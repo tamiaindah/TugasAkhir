@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Two-way Data Binding</title>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            {{ message }}
+        </div>
+        <input type="text" v-model="message">
+    </div>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    message: 'Hello World!'
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
