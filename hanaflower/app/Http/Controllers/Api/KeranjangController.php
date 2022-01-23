@@ -42,12 +42,12 @@ class KeranjangController extends Controller {
             $item = $item -> first();
 
             //sum price * quantity
-            $price = $request -> price * $item -> quantity;
+            $price = $request -> harga * $item -> qty;
 
             //sum weight
-            $weight = $request -> weight * $item -> quantity;
+            $weight = $request -> berat * $item -> qty;
             $item -> update([
-                'harga' => $harga
+                'harga' => $price
             ]);
         } else {
             $item = Keranjang::create([
@@ -75,6 +75,21 @@ class KeranjangController extends Controller {
             'success' => true,
             'message' => 'Total Harga Keranjang ',
             'total' => $keranjangs
+        ]);
+    }
+
+    public function getTotalBerat()
+    {
+        $keranjangs = Keranjang::with('produk') -> where('customer_id', auth() -> user() -> id) -> orderBy('created_at', 'desc') -> get();
+        $berat = 0; //dalam gram
+        foreach ($keranjangs as $keranjang) {
+            $weight = $keranjang->qty * $keranjang->produk->berat;
+            $berat += $weight;
+        }
+        return response() -> json([
+            'success' => true,
+            'message' => 'Total Berat Keranjang',
+            'total' => $berat
         ]);
     }
 
