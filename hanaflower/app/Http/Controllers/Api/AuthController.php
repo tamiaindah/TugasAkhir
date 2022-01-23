@@ -12,13 +12,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-class AuthController extends Controller {
+class AuthController extends Controller
+{
     /**
      * __construct
      *
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth:api')->except(['register', 'login']);
     }
     /**
@@ -27,31 +29,38 @@ class AuthController extends Controller {
      * @param mixed $request
      * @return void
      */
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:customers',
             'password' => 'required|confirmed',
+            'province' => 'required',
+            'city' => 'required',
+            'address' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
         $customer = Customer::create([
-            'nama' => $request->nama,
+            'nama' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
+            'province_id' => $request->province,
+            'city_id' => $request->city,
+            'address' => $request->address
         ]);
-        
+
         $token = JWTAuth::fromUser($customer);
-        
+
         if ($customer) {
-            return response() -> json([
+            return response()->json([
                 'success' => true,
                 'user' => $customer,
                 'token' => $token
             ], 201);
         }
-        return response() -> json([
+        return response()->json([
             'success' => false,
         ], 409);
     }
@@ -61,25 +70,33 @@ class AuthController extends Controller {
      * @param mixed $request
      * @return void
      */
-    public function login(Request $request) {
-        $validator = Validator::make($request -> all(), [
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        $validator = Validator::make($credentials, [
             'email' => 'required|email',
             'password' => 'required',
         ]);
-        if ($validator -> fails()) {
-            return response() -> json($validator -> errors(), 400);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
         }
-        $credentials = $request -> only('email', 'password');
-        if (!$token = auth() -> guard('api') -> attempt($credentials)) {
-            return response() -> json([
+        // if (!$token = auth() -> attempt($credentials)) {
+        if (!$token = auth()->guard('api')->attempt($validator->validated())) {
+            return response()->json([
                 'success' => false,
                 'message' => 'Email or Password is incorrect'
             ], 401);
         }
-        return response() -> json([
+
+        // return $this->respondWithToken($token);
+
+        return response()->json([
             'success' => true,
-            'user' => auth() -> guard('api') -> user(),
-            'token' => $token
+            'user' => auth()->guard('api')->user(),
+            'token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ], 201);
     }
     /**
@@ -87,10 +104,21 @@ class AuthController extends Controller {
      *
      * @return void
      */
-    public function getUser() {
-        return response() -> json([
+    public function getUser()
+    {
+        return response()->json([
             'success' => true,
-            'user' => auth() -> user()
+            'user' => auth()->user()
+        ], 200);
+    }
+
+    public function logout()
+    {
+        auth()->logout();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil logout'
         ], 200);
     }
 }
