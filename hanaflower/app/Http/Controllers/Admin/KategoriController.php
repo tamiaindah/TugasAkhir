@@ -12,13 +12,13 @@ use App\Http\Controllers\Controller;
 class KategoriController extends Controller
 {
     //
-    public function index() //buat ambil data tb kategori trus ditampilin di index 
+    public function index() //buat ambil data tb kategori trus ditampilin di index
     {
         $kategoris = Kategori::latest() -> when(request() -> q, //menampilkan nama berdasarkan request q
             function($kategoris) {
-                $kategoris = $kategoris -> where('nama', 'like', '%'.request() -> q. '%'); 
+                $kategoris = $kategoris -> where('nama', 'like', '%'.request() -> q. '%');
             }) -> paginate(10); //paginatccion menampilkan sepuluh data per halaman
-       
+
             return view('admin.kategori.index', compact('kategoris'));
     }
 
@@ -54,7 +54,7 @@ class KategoriController extends Controller
                         redirect() -> route('admin.kategori.index') -> with(['error' => 'Data tidak dapat disimpan!']);
                             }
                         }
-                        
+
                         public function edit(Kategori $kategori) {
                             return view('admin.kategori.edit', compact('kategori')); //buat nampilin proses edit data, pake compact buat parshing variabel nya
                         }
@@ -82,7 +82,7 @@ class KategoriController extends Controller
 
                                 //update dengan foto baru
                                 $kategori = Kategori::findOrFail($kategori -> id);
-                                $kategory -> update([
+                                $kategori -> update([
                                     'foto' => $foto -> hashName(),
                                     'nama' => $request -> nama,
                                     'slug' => Str::slug($request -> nama, '-')
@@ -99,7 +99,7 @@ class KategoriController extends Controller
                                             redirect() -> route('admin.kategori.index') -> with(['error' => 'Data tidak dapat Diupdate!']);
                                                 }
                                             }
-                                            
+
                                             public function destroy($id) {
                                                 //cari data berdasarkan id
                                                 $kategori = Kategori::findOrFail($id);
