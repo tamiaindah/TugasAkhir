@@ -36,40 +36,42 @@ class CheckoutController extends Controller {
             for ($i = 0; $i < $length; $i++) {
                 $random = rand(0, 1) ? rand(0, 9) : chr(rand(ord('a'), ord('z')));
             }
-            $kode_transaksi = 'INV-'.Str::upper($random);
+            $kode_transaksi = 'INV-'.Str::upper($random).time();
 
             $transaksi = Transaksi::create([
-                'tagihan' => $kode_transaksi,
+                'kode_transaksi' => $kode_transaksi,
                 'customer_id' => auth() -> guard('api') -> user() -> id,
-                'kurir' => $this -> request -> kurir,
+                'kurir' => $this -> request -> courier,
                 'service' => $this -> request -> service,
-                'ongkir' => $this -> request -> ongkir,
-                'berat' => $this -> request -> berat,
-                'nama' => $this -> request -> nama,
-                'no_hp' => $this -> request -> no_hp,
-                'provinsi' => $this -> request -> provinsi,
-                'kota' => $this -> request -> kota,
-                'alamat' => $this -> request -> alamat,
-                'total' => $this -> request -> total,
+                'ongkir' => $this -> request -> cost,
+                'berat' => $this -> request -> weight,
+                'nama' => $this -> request -> name,
+                'no_hp' => $this -> request -> phone,
+                'provinsi' => $this -> request -> province,
+                'kota' => $this -> request -> city,
+                'alamat' => $this -> request -> address,
+                'total' => $this -> request -> grand_total,
+                'snap_token' => 0,
                 'status' => 'pending',
             ]);
+
             foreach(Keranjang::where('customer_id', auth() -> guard('api') -> user() -> id) -> get() as $keranjang) {
                 //insert product ke table order
                 $transaksi -> orders() -> create([
                     'transaksi_id' => $transaksi -> id,
-                    'tagihan' => $kode_transaksi,
+                    'invoice' => $kode_transaksi,
                     'produk_id' => $keranjang -> produk_id,
                     'nama_produk' => $keranjang -> produk -> nama,
-                    'foto' => $keranjang -> produk -> image,
+                    'foto' => $keranjang -> produk -> foto,
                     'qty' => $keranjang -> qty,
-                    'price' => $keranjang -> harga,
+                    'harga' => $keranjang -> harga,
                 ]);
             }
-            
+
             // Buat transaksi ke midtrans kemudian save snap tokennya.
             $payload = [
                 'transaction_details' => [
-                    'order_id' => $transaksi -> tagihan,
+                    'order_id' => $transaksi -> kode_transaksi,
                     'gross_amount' => $transaksi -> total,
                 ],
                 'customer_details' => [
@@ -81,8 +83,8 @@ class CheckoutController extends Controller {
             ];
             //create snap token
             $snapToken = Snap::getSnapToken($payload);
-            $invoice -> snap_token = $snapToken;
-            $invoice -> save();
+            $transaksi -> snap_token = $snapToken;
+            $transaksi -> save();
             $this -> response['snap_token'] = $snapToken;
         });
         return response() -> json([
@@ -110,7 +112,7 @@ class CheckoutController extends Controller {
         $fraud = $notification -> fraud_status;
 
         //data tranaction
-        $data_transaction = Transaksi::where('transakasi', $orderId) -> first();
+        $data_transaction = Transaksi::where('kode_transaksi', $orderId) -> first();
         if ($transaction == 'capture') {
             // For credit card transaction, we need to check whether transaction is challenge by FDS or not
             if ($type == 'credit_card') {
@@ -126,7 +128,7 @@ class CheckoutController extends Controller {
                      * update invoice to success
                      */
                     $data_transaction -> update([
-                        'status' => 'success'
+                        'status' => 'sukses'
                     ]);
                 }
             }
@@ -136,7 +138,7 @@ class CheckoutController extends Controller {
              * update invoice to success
              */
             $data_transaction -> update([
-                'status' => 'success'
+                'status' => 'sukses'
             ]);
         }
         elseif($transaction == 'pending') {
@@ -152,7 +154,7 @@ class CheckoutController extends Controller {
              * update invoice to failed
              */
             $data_transaction -> update([
-                'status' => 'failed'
+                'status' => 'gagal'
             ]);
         }
         elseif($transaction == 'expire') {
@@ -168,7 +170,7 @@ class CheckoutController extends Controller {
              * update invoice to failed
              */
             $data_transaction -> update([
-                'status' => 'failed'
+                'status' => 'gagal'
             ]);
         }
     }
