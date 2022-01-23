@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 * Route API Auth dengan method POST
 */
 Route::post('/login', [AuthController::class, 'login'])->name('api.customer.login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('api.customer.logout');
 Route::post('/register', [AuthController::class, 'register'])->name('api.customer.register');
 Route::get('/user', [AuthController::class, 'getUser'])->name('api.customer.user');
 
@@ -18,7 +19,7 @@ Route::get('/order', [OrderController::class, 'index'])->name('api.order.index')
 Route::get('/order/{snap_token?}', [OrderController::class, 'show'])->name('api.order.show');
 
 /**
-* Route API KategorI    
+* Route API KategorI
 */
 Route::get('/kategoris', [KategoriController::class, 'index'])->name('customer.kategori.index');
 Route::get('/kategori/{slug?}', [KategoriController::class, 'show'])->name('customer.kategori.show');
@@ -35,9 +36,10 @@ Route::get('/produks/{slug?}', [ProdukController::class, 'show'])->name('custome
 */
 Route::get('/keranjang', [KeranjangController::class, 'index'])->name('customer.keranjang.index');
 Route::post('/keranjang', [KeranjangController::class, 'store'])->name('customer.keranjang.store');
-Route::get('/keranjang/total', [KeranjangController::class, 'getCartTotal'])->name('customer.keranjang.total');
-Route::post('/keranjang/remove', [KeranjangController::class, 'removeCart'])->name('customer.keranjang.remove');
-Route::post('/keranjang/removeSemua', [KeranjangController::class, 'removeAllCart'])->name('customer.keranjang.removeSemua');
+Route::get('/keranjang/total', [KeranjangController::class, 'getTotalKeranjang'])->name('customer.keranjang.total');
+Route::get('/keranjang/totalBerat', [KeranjangController::class, 'getTotalBerat'])->name('customer.keranjang.berat');
+Route::post('/keranjang/remove', [KeranjangController::class, 'removeKeranjang'])->name('customer.keranjang.remove');
+Route::post('/keranjang/removeSemua', [KeranjangController::class, 'removeSemuaKeranjang'])->name('customer.keranjang.removeSemua');
 
 /**
 * Route Raja Ongkir

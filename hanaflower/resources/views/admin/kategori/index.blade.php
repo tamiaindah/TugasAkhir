@@ -42,8 +42,8 @@
                                     <th scope="row" style="text-align: center">
                                         {{ ++$no + ($kategoris->currentPage()-1) * $kategoris->perPage() }}</th>
                                     <td class="text-center">
-                                        <?php echo $kategori->foto ?>
-                                        <img src="{{ $kategori->foto }}" style="width:50px">
+                                        {{-- <?php echo $kategori->foto ?> --}}
+                                        <img src="{{ asset('/storage/kategori/'.$kategori->foto) }}" style="width:50px">
                                     </td>
                                     <td>{{ $kategori->nama }}</td>
                                     <td class="text-center">

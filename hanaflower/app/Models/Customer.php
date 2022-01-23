@@ -7,13 +7,13 @@ use Tymon\JWTAuth\Contracts\JWTSubject; // <-- import JWTSubject
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Customer extends Authenticatable implements JWTSubject //buat nambahin function 
+class Customer extends Authenticatable implements JWTSubject //buat nambahin function
 {
     use HasFactory;
 
     /**ini ngijinin smua proses manipulasi data dari isi table dari database nya */
     protected $fillable = [
-        'nama', 'email', 'password'
+        'nama', 'email', 'password', 'province_id', 'city_id', 'address'
     ];
 
     /**buat security, di hide biar aman */

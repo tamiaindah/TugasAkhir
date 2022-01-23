@@ -19,7 +19,10 @@ class CreateCustomersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nuallable(); /*email verif */
             $table->string('password');
-            $table->rememberToken(); 
+            $table->integer('province_id')->nullable();
+            $table->integer('city_id')->nullable();
+            $table->text('address');
+            $table->rememberToken();
             $table->timestamps();
         });
     }
